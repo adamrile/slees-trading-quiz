@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sofie’s Trade Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f8ff;--grid:#dce8f5;--ink:#20344b;--card:#ffffff;--up:#16845b;--upbg:#dff6eb;--down:#c83e55;--downbg:#fde6e8;--muted:#5d6f83;--gold:#4b91d1;--blue:#2868b2}
+@media (prefers-color-scheme:dark){:root{--bg:#111d2b;--grid:#26394d;--ink:#edf5ff;--card:#1b2a3a;--up:#58d49b;--upbg:#173d32;--down:#ff7186;--downbg:#48252d;--muted:#b6c6d8;--gold:#83b9ec;--blue:#80b8ff}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--bg);color:var(--ink);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+main{max-width:620px;margin:0 auto;padding:20px 18px 40px;min-height:100vh;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.streak{background:var(--card);border:2px solid var(--ink);border-radius:999px;padding:6px 14px}
+h1{font-size:2.1rem;line-height:1.08;margin:32px 0 12px;font-weight:800}
+.learning-note{font-size:.88rem;line-height:1.45;margin:0 0 8px;padding:10px 12px;border-left:3px solid var(--up);background:rgba(40,104,178,.06);border-radius:0 8px 8px 0}.welcome-heading{font-size:clamp(1.05rem,3.8vw,1.35rem);line-height:1.25;letter-spacing:-.02em;margin:24px 0 12px}.welcome-heading #streakValue{white-space:nowrap}
+h2.sub{font-size:1.2rem;margin:26px 0 10px}
+.quiz-back{display:inline-block;width:auto;border:0;background:transparent;color:var(--ink);font-size:1.7rem;line-height:1;padding:0 8px 4px 0;margin:0 0 2px;box-shadow:none;text-align:left}.quiz-back:active{transform:translateX(-2px)}
+.progress-panel{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:16px;margin:18px 0;box-shadow:4px 4px 0 var(--grid)}
+.progress-title{font-weight:800;font-size:1.08rem;margin-bottom:4px}
+.reward-row{margin-top:16px}.reward-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.95rem;font-weight:700;margin-bottom:7px}.reward-head small{color:var(--muted);font-size:.82rem;font-weight:600;text-align:right}
+.reward-track{height:12px;background:var(--grid);border-radius:99px;overflow:hidden}.reward-track i{display:block;height:100%;width:0;background:var(--up);border-radius:99px;transition:width .45s}
+.reward-note{font-size:.86rem;color:var(--muted);margin-top:6px}
+/* Birthday welcome overlay */
+.birthday-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(25,35,50,.72);overflow:hidden}
+.birthday-overlay.hide{display:none}.birthday-card{position:relative;z-index:2;width:min(100%,520px);max-height:90vh;overflow:auto;background:var(--bg);color:var(--ink);border:3px solid var(--gold);border-radius:24px;padding:28px 24px;text-align:center;box-shadow:0 12px 0 rgba(0,0,0,.15);animation:pop-in .45s cubic-bezier(.2,.8,.2,1) both}
+.birthday-card h2{font-size:clamp(1.8rem,7vw,2.7rem);line-height:1.05;margin:4px 0 14px}.birthday-card p{color:var(--ink);line-height:1.65;white-space:pre-line}.birthday-card .birthday-icon{font-size:2.5rem;margin-bottom:8px}.birthday-card .btn{margin-top:18px}
+.balloon{position:absolute;z-index:1;bottom:-150px;width:54px;height:68px;border-radius:50% 50% 46% 46%;opacity:.9;animation:float-up 7s linear infinite}.balloon:after{content:"";position:absolute;left:50%;top:66px;width:1px;height:62px;background:rgba(255,255,255,.8)}.balloon.b1{left:8%;background:#78b6ed;animation-delay:-1s}.balloon.b2{left:24%;background:#58c79a;animation-delay:-4s;transform:scale(.8)}.balloon.b3{right:20%;background:#3c91c8;animation-delay:-2s}.balloon.b4{right:7%;background:#2f9c76;animation-delay:-5s;transform:scale(.9)}
+.confetti{position:absolute;z-index:1;top:-20px;width:9px;height:14px;opacity:.95;animation:confetti-fall 4.5s linear infinite}
+@keyframes float-up{from{bottom:-150px}to{bottom:110%}}@keyframes confetti-fall{from{transform:translateY(-20px) rotate(0)}to{transform:translateY(110vh) rotate(720deg)}}@keyframes pop-in{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.balloon,.confetti,.birthday-card{animation:none!important}}
+p{line-height:1.5;color:var(--muted);font-size:1.02rem;margin:8px 0}
+.question-visual{margin:12px 0 16px;padding:12px;background:var(--card);border:1.5px solid var(--grid);border-radius:14px}.question-visual svg{display:block;width:100%;max-height:220px}.visual-caption{font-size:.82rem;color:var(--muted);margin:5px 2px 0;line-height:1.4}
+.gift{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:16px 18px;margin:16px 0;box-shadow:6px 6px 0 #b8d9f4}
+.gift p{color:var(--ink);margin:0;line-height:1.65;font-size:1.05rem}
+button{font:inherit;font-weight:800;cursor:pointer}
+.btn{display:block;text-align:center;text-decoration:none;width:100%;padding:16px;border-radius:14px;border:2px solid var(--ink);background:linear-gradient(135deg,#2868b2,#278a68);color:#fff;font-size:1.1rem;box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.alt{background:var(--card);color:var(--ink)}
+.btn.bad{background:var(--down)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.category{margin:16px 0;border:2px solid var(--ink);border-radius:16px;background:var(--card);overflow:hidden;box-shadow:0 3px 0 var(--ink)}
+.category summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;font-weight:800;font-size:1.08rem;cursor:pointer;background:linear-gradient(110deg,rgba(40,104,178,.13),rgba(39,138,104,.06),transparent)}
+.category summary::-webkit-details-marker{display:none}
+.category summary::after{content:"+";display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:50%;background:#f9edcf;color:#6e4d13;font-size:1.25rem}
+.category[open] summary::after{content:"−"}
+.category .cat-content{padding:0 12px 4px}
+.category .sec{margin:8px 0 12px;border-color:#c8d4e2;box-shadow:0 2px 0 #e1e7ed}
+.category .sec:hover{background:#f0f7ff}
+@media (prefers-color-scheme:dark){.category summary{background:linear-gradient(110deg,rgba(128,184,255,.15),rgba(88,212,155,.08),transparent)}.category summary::after{background:#263f52;color:#d6eaff}.category .sec:hover{background:#24374a}}
+.sec{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--ink);border-radius:14px;padding:13px 16px;margin-bottom:12px;box-shadow:0 3px 0 var(--ink)}
+.sec:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.sec b{font-size:1.05rem}
+.sec span{display:block;font-weight:400;color:var(--muted);font-size:.92rem;margin:2px 0 8px}
+.meter{height:9px;background:var(--grid);border-radius:9px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--up)}
+.bar{height:14px;background:var(--card);border:2px solid var(--ink);border-radius:99px;overflow:hidden;margin:18px 0 8px}
+.bar i{display:block;height:100%;background:var(--up);width:0;transition:width .35s}
+.tag{font-size:.9rem;color:var(--muted);margin-bottom:20px}
+.q{font-size:1.4rem;font-weight:800;line-height:1.28;margin:0 0 20px}
+.opt{display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:12px;background:var(--card);color:var(--ink);border:2px solid var(--ink);border-bottom-width:4px;border-radius:14px;font-size:1.02rem;font-weight:600}
+.opt.sel{background:#e7f2ff;color:#20344b;box-shadow:0 0 0 3px var(--blue)}
+@media (prefers-color-scheme:dark){.opt.sel{background:#2b3b52;color:var(--ink)}}
+.opt.ok{background:var(--upbg);border-color:var(--up);color:var(--ink)}
+.opt.no{background:var(--downbg);border-color:var(--down);color:var(--ink)}
+.figgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.figgrid .opt{margin:0;padding:8px}
+.figopt::before{content:attr(data-l);display:block;font-size:.8rem;font-weight:800;color:var(--muted);margin-bottom:2px}
+.figopt svg{display:block}
+.foot{margin-top:auto;padding-top:16px}
+.fb{border-radius:14px;padding:14px 16px;margin-bottom:14px;line-height:1.45}
+.fb.ok{background:var(--upbg);border:2px solid var(--up)}
+.fb.no{background:var(--downbg);border:2px solid var(--down)}
+.fb b{display:block;font-size:1.1rem;margin-bottom:2px}
+.score{font-size:4rem;font-weight:800;margin:26px 0 0}
+.hide{display:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="birthdayOverlay" class="birthday-overlay hide" role="dialog" aria-modal="true" aria-labelledby="birthdayTitle">
+ <div class="balloon b1"></div><div class="balloon b2"></div><div class="balloon b3"></div><div class="balloon b4"></div>
+ <div id="confettiLayer" aria-hidden="true"></div>
+ <div class="birthday-card">
+  <div class="birthday-icon">🎂🎈✨</div>
+  <h2 id="birthdayTitle">Happiest Birthday, Sofie!!</h2>
+  <p id="birthdayMessage"></p>
+  <button class="btn" id="closeBirthday">Let’s celebrate & start learning 💛</button>
+ </div>
+</div>
+<main>
+ <div class="top"><span id="brand">Daily Trade Practice</span><span class="streak" id="streak">0 day streak</span></div>
+
+ <section id="home">
+  <h1 id="hello" class="welcome-heading">Hi Sofie, your current daily streak is: <span id="streakValue">0 days</span></h1>
+  <p id="status"></p>
+  <p class="learning-note">These questions follow the trading framework you’re studying. Treat setups as possibilities, not guarantees.</p>
+  <div class="progress-panel" aria-label="Prize progress">
+   <div class="progress-title">Your streak &amp; rewards ✨</div>
+   <p id="progressIntro">Get 4/5 or more in the daily mix to build your streak.</p>
+   <div class="reward-row">
+    <div class="reward-head"><span>☕ Coffee date · 5 days</span><small id="coffeeCount">0 / 5 days</small></div>
+    <div class="reward-track"><i id="coffeeProgress"></i></div>
+    <div class="reward-note" id="coffeeNote"></div>
+   </div>
+   <div class="reward-row">
+    <div class="reward-head"><span>🍝 Dinner date · 14 days</span><small id="dinnerCount">0 / 14 days</small></div>
+    <div class="reward-track"><i id="dinnerProgress"></i></div>
+    <div class="reward-note" id="dinnerNote"></div>
+   </div>
+   <div class="reward-row">
+    <div class="reward-head"><span>🎬 Cinema date · 21 days</span><small id="cinemaCount">0 / 21 days</small></div>
+    <div class="reward-track"><i id="cinemaProgress"></i></div>
+    <div class="reward-note" id="cinemaNote"></div>
+   </div>
+  </div>
+  <button class="btn" id="daily">Start today's mix</button>
+  <h2 class="sub">Practice by section</h2>
+  <div id="secs"></div>
+ </section>
+
+ <section id="quiz" class="hide">
+  <button class="quiz-back" id="quizBack" type="button" aria-label="Back to home" title="Back to home">←</button>
+  <div class="bar"><i id="prog"></i></div>
+  <div class="tag" id="tag"></div>
+  <h2 class="q" id="qtext"></h2>
+  <div id="questionVisual" class="question-visual hide" aria-label="Illustrative trading chart"></div>
+  <div id="opts"></div>
+  <div class="foot">
+   <div id="fb" class="fb hide"></div>
+   <button class="btn" id="check" disabled>Check</button>
+  </div>
+ </section>
+
+ <section id="done" class="hide">
+  <h1>Round complete</h1>
+  <div class="score" id="score"></div>
+  <p id="doneMsg"></p>
+  <div id="prizeBox" class="gift hide"><p id="prizeMsg"></p><a id="emailPrize" class="btn" href="#">Tell him I won 🎁</a><p id="emailHelp" class="hide"></p></div>
+  <div class="foot"><button class="btn" id="back">Back to home</button></div>
+ </section>
+</main>
+
+<script>
+// ===== Personalise this gift here =====
+const FRIEND_NAME = "Sofie";
+const MESSAGE = "Happy birthday Sofff!! I've seen how much time and effort you're putting into learning to trade, so I made you this: a little practice space with short daily quizzes on the exact things you're studying (I've added a streak system too because I've seen how good you are at keeping your Duolingo one going). One of your most admirable traits is how humble you are with your intellect, so I wanted to make you something that stimulates your clever brain. If you hate it, I can get you something store-bought next year... Some days things will click and some days they won't, and both count. I'm proud of you for sticking with it, and I'm always happy to talk through anything that doesn't make sense yet. Hope you enjoy it — and there are a few treats along the way, too! 💛";
+// Put your email address here. Prize buttons open a pre-filled email for Sofie to send;
+// a static HTML page cannot send emails automatically on its own.
+const PRIZE_EMAIL = "YOUR_EMAIL_HERE";
+// ======================================
+
+// Draws a mini candlestick chart. cs = [[open,high,low,close],...] on a 0-100 scale.
+// ex.lines = [[y,color,dashed]], ex.boxes = [[firstCandle,lastCandle,yLow,yHigh,color]]
+function fig(cs, ex){
+ ex = ex || {}; const W=360, H=176, left=28, right=12, top=10, bottom=18, plotH=H-top-bottom, gap=(W-left-right)/cs.length, y = v => top+plotH-(v/100)*plotH;
+ let o = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Illustrative candlestick chart" style="background:#fbfcfe;border-radius:10px">';
+ // Light grid and understated price axis make structure easier to read.
+ [20,40,60,80].forEach(v=>{o+='<line x1="'+left+'" x2="'+(W-right)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#e4e9f0" stroke-width="1"/><text x="'+(left-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="8" fill="#7b8795">'+v+'</text>';});
+ (ex.boxes||[]).forEach(b => { const x0=left+b[0]*gap+1, x1=left+(b[1]+1)*gap-1, c=b[4]||"#d99a28";
+  o += '<rect x="'+x0+'" y="'+y(b[3])+'" width="'+Math.max(4,x1-x0)+'" height="'+Math.max(2,y(b[2])-y(b[3]))+'" fill="'+c+'" fill-opacity=".22" stroke="'+c+'" stroke-width="1.5"/>'; });
+ (ex.lines||[]).forEach(l => { o += '<line x1="'+left+'" x2="'+(W-right)+'" y1="'+y(l[0])+'" y2="'+y(l[0])+'" stroke="'+(l[1]||"#5479a6")+'" stroke-width="1.8" '+(l[2]?'stroke-dasharray="6 4"':'')+'/>'; });
+ cs.forEach((c,i) => { const x=left+i*gap+gap/2, col = c[3]>=c[0] ? "#159568" : "#d64d5b", bw=Math.min(12,Math.max(5,gap*.52),gap-2);
+  o += '<line x1="'+x+'" x2="'+x+'" y1="'+y(c[1])+'" y2="'+y(c[2])+'" stroke="'+col+'" stroke-width="2"/><rect x="'+(x-bw/2)+'" y="'+y(Math.max(c[0],c[3]))+'" width="'+bw+'" height="'+Math.max(2,Math.abs(y(c[0])-y(c[3])))+'" rx="1" fill="'+col+'" stroke="'+col+'" stroke-width=".7"/>'; });
+ return o + '</svg>';
+}
+
+// Each question: [question, [correct answer, wrong, wrong, wrong], explanation]
+// To add content, add questions to a section or append a new section object.
+const SECTIONS = [
+{id:"basics",group:"Market structure",name:"What market structure is",desc:"Why price zigzags and what structure is for",qs:[
+["Why does price move in zigzags instead of a straight vertical line?",["Buyers and sellers are both active at all times, so the dominant side only wins overall, not in every moment","Market makers deliberately slow price down","Charts only update every few candles","Only sellers are active during pullbacks"],"In an uptrend there are more buys than sells over the window, but not in every moment. Those moments of extra selling create the pullbacks."],
+["What creates the pivot points and zigzag pattern we call market structure?",["Moments when the weaker side briefly gains the upper hand","Random noise with no meaning","Broker spread changes","News events only"],"Pullbacks in an uptrend (and bounces in a downtrend) are moments when the other side briefly dominates."],
+["Which of these is NOT a main use of market structure?",["Predicting exact tops and bottoms to the tick","Confirming ranges","Confirming future entry points","Building context"],"Structure is used to confirm ranges, confirm entries and build context, not to call exact ticks."],
+["If buying pressure dominated continuously with no meaningful pullbacks, what would price action look like?",["A near-vertical move with very little retracement","A regular zigzag with deep pullbacks","A flat range with equal highs and lows","An immediate reversal after every candle"],"Real price action usually includes shifts in buying and selling pressure. Pullbacks create the swings that traders use to read market structure."]
+]},
+{id:"six",group:"Market structure",name:"The six candle rule",desc:"The 2-2-2 rule and inside bars",qs:[
+["What does the six candle rule (2-2-2) require for valid uptrend structure?",["2+ bullish closes higher, then 2+ bearish closes lower, then 2+ bullish closes higher","3 bullish candles then 3 bearish candles","Any 6 candles in a row","2 bullish candles then a doji then 2 bearish"],"Expansion, retracement, expansion: at least two consecutive candles in each leg, each trading beyond the previous one."],
+["What is the six candle rule sequence in a downtrend?",["2+ bearish closes lower, 2+ bullish closes higher, then 2+ bearish closes lower","2 bullish, 2 bearish, 2 bullish","1 bearish, 1 bullish, 1 bearish","4 bearish candles in a row"],"It mirrors the uptrend: down, up, down, each leg with at least two consecutive candles."],
+["What is an inside bar candle?",["A candle whose high and low sit entirely within the other candle's high and low","A candle with no wicks","A candle that opens and closes at the same price","A candle that closes above the previous high"],"If one candle's range is fully inside its neighbour's range, it is an inside bar."],
+["Two bearish candles are back to back, but the second is an inside bar. Does this count as 2 consecutive bearish candles?",["No, inside bars do not count towards the rule","Yes, colour is all that matters","Only if it has a long wick","Only on higher time frames"],"Inside bars do not count in the 2-2-2 rule."],
+["Your retracement leg has only one bearish candle, even though several bearish candles follow later inside the next move. Is it valid structure?",["No, the two candles must be in the retracement leg itself, so keep extending until it is valid","Yes, later bearish candles make up for it","Yes, as long as the next move is large","Only if volume was high"],"Candles inside the later price action do not count. The retracement leg needs its own two consecutive candles."],
+["A move shows no valid structure on the 3-day chart. What can you do?",["Check lower time frames, where the six candle rule may be satisfied","Draw it anyway","Ignore the move entirely","Assume it is a break of structure"],"What looks like one leg on a high time frame can contain valid structure on a lower one."]
+]},
+{id:"highlow",group:"Market structure",name:"Structure highs and lows",desc:"When a high or low is confirmed",qs:[
+["In an uptrend, when is a market structure low confirmed?",["The moment price touches the market structure high","As soon as the low is created","When price closes below it","After three higher highs"],"The low is only confirmed once price comes back and touches the structure high."],
+["How do you pick the market structure low in an uptrend?",["Take the lowest point price traded between the high being created and the high being touched again","Take the most recent candle low","Take the first low of the day","Take the lowest close"],"Find the lowest point between the high's creation and the high being touched again."],
+["In an uptrend you have a structure high, and price makes a new low and then a new high, but has not touched the old structure high. Does the structure low move up?",["No, it stays until price touches the structure high","Yes, immediately to the new low","Yes, once the new high is made","Only if the new high is higher"],"The structure low only updates once the structure high is touched."],
+["In a downtrend, when is a market structure high confirmed?",["The moment price touches the market structure low","When price closes above it","When price makes a lower high","When volume increases"],"It is the mirror of the uptrend rule: the high is confirmed when the structure low is touched."],
+["In a downtrend, how do you pick the market structure high?",["The highest point price traded between the low being created and the low being touched","The highest close in the move","The first bounce after the low","The highest volume candle"],"Look at the highest point between the low's creation and it being touched again."],
+["Does touching the structure low (to confirm the high in a downtrend) need to be a close?",["No, a touch is enough","Yes, a close is required","Yes, two closes are required","Only on the daily chart"],"Confirming the structure point only needs a touch. A break of structure is what needs a close."]
+]},
+{id:"bos",group:"Market structure",name:"Break of structure",desc:"BOS, trend shifts and expected order flow",qs:[
+["What is a break of structure (BOS)?",["A closing price beyond the market structure high or low","Any wick beyond a high or low","Price touching a high or low","Two candles in the same direction"],"A BOS needs a close beyond the level, not just a touch."],
+["What does 'expectational order flow' mean?",["What you expect price to do next","The exact price target","The broker's order book","Past volume data"],"It is a fancy way of saying what you think price will do next."],
+["In an uptrend, price closes above the structure high. What is the expected order flow?",["A higher low for a higher high","A lower high for a lower low","A range","A full reversal"],"A bullish break in an uptrend suggests continuation: higher low, then higher high."],
+["In an uptrend, price closes below the structure low. What does that indicate?",["A bearish BOS and a shift in trend; expect a lower high for a lower low","A continuation of the uptrend","Just a wick","Nothing until three candles close below"],"Breaking the low in an uptrend shifts the trend, so the expected flow becomes lower high, lower low."],
+["In a downtrend, price breaks the structure low with a close. What is the expected order flow?",["A lower high for a lower low","A higher low for a higher high","A trend shift","A range"],"A bearish break in a downtrend suggests continuation."],
+["In a downtrend, price closes above the structure high. What does that indicate?",["A bullish BOS and a shift in trend; expect a higher low for a higher high","Continuation of the downtrend","A lower low is coming","A wick"],"Closing above the high in a downtrend flips the expected flow to higher low, higher high."]
+]},
+{id:"good",group:"Market structure",name:"Good vs bad breaks",desc:"How convincing is the break?",qs:[
+["Which two things make a good break of structure?",["Good distance beyond the level, and at least one candle spent above it before retracing","A big wick and high volume","A gap and a doji","Two candles of the same colour"],"A convincing break has distance and at least one candle holding beyond the level."],
+["Does the candle that causes the break count as the 'one candle spent above' the structure high?",["No, it does not count","Yes, it is the first one","Only if it is bullish","Only on lower time frames"],"You need at least one candle after the breaking candle to stay above."],
+["What does a bad break of structure look like?",["A candle closes beyond the level, and the next candle immediately closes back inside with little distance","A break with several closes above it","A break with a large gap","A break on the weekly chart"],"No distance and an immediate close back inside make it unconvincing."],
+["After a bad break in an uptrend, how should you treat the call for a higher low and higher high?",["Be careful and not assume it, since the break is not convincing","Take it with full conviction","Always bet on the opposite","Ignore structure entirely"],"A bad break does not give you strong conviction. Wait for more confirmation."]
+]},
+{id:"wick",group:"Market structure",name:"Wicks (SFPs)",desc:"Taking a level without closing beyond it",qs:[
+["What is a wick (swing failure pattern) in this context?",["Price takes the structure high or low but fails to close beyond it","A candle with a long body","A break with a close","A gap between candles"],"The level is exceeded, but the candle closes back on the other side."],
+["Is a wick a break of structure?",["No, they are very different things","Yes, it is a weak break","Yes, if it goes far enough","Only in a downtrend"],"A wick makes the other structure point weak. It is not a BOS."],
+["In an uptrend, price wicks the structure high. Which point becomes weak?",["The market structure low","The structure high","Neither","The wick high"],"The low's job is to take out and close above the high. After the wick it failed, so the low is weak and can be taken."],
+["In a downtrend, price wicks the structure low. What can happen?",["The structure high becomes weak and price may rotate fully back up to it","A guaranteed continuation","A guaranteed BOS","Nothing changes"],"A failed close below the low makes the high weak."],
+["Wick scenario 1 (after wicking the structure high in an uptrend):",["Full rotation back down toward the market structure low","Price closes above the next candle","Price makes a higher low and higher high","Price goes sideways forever"],"One possible outcome is a full rotation down to the structure low."],
+["Wick scenario 2: price wicks the high and gets a reaction away, then makes a higher low and higher high. What becomes the new break level?",["The wick high","The old structure low","The high of the day","The midpoint"],"The wick high becomes your structure high, and you cannot call a BOS until price closes above it."],
+["Wick scenario 3: the first candle wicks the high but the next candle closes above it. What is the result?",["It is still a break of structure","It is a failed break","It is a range","It is a wick, so no BOS"],"If the very next candle closes above, the break stands."]
+]},
+{id:"domino",group:"Market structure",name:"Overlapping structure & the domino effect",desc:"High, mid and low time frame structure",qs:[
+["Which time frame structure is most important and significant?",["The highest time frame","The lowest time frame","They are equal","The 1-minute"],"The higher the time frame, the more significant the structure."],
+["Which three levels of overlapping market structure are commonly used to read a chart?",["High, mid and low time frame structure","Trend, range and breakout","Support, resistance and volume","Daily, weekly and monthly only"],"High, mid and low time frame structure, each nested inside the one above."],
+["A move looks like one leg on the daily. What might you see on lower time frames?",["Zigzag structure inside it","Exactly the same single candle","No data","Only range"],"Moves on a high time frame are made of structure on lower time frames."],
+["If your high time frame is the 1-hour, which pairing works as the mid and low time frames?",["15-minute (mid) and 3-minute (low)","4-hour and daily","30-minute and 1-hour","5-minute and 1-minute"],"Mid and low time frames are chosen relative to the high one. For a 1-hour high time frame, 15-minute and 3-minute is a typical pairing."],
+["What is the domino effect in an uptrend context?",["Breaking low time frame structure back to bullish can lead to the mid time frame high, then breaking that can lead to the high time frame high","One candle causes all time frames to flip","Highs knock over lows on the same chart","Volume decides the next move"],"Break the low time frame structure and price can move to the mid time frame high. Break that, and it can move to the high time frame high."],
+["Why does the domino effect keep you out of fake higher lows?",["If the mid and low time frames never break back to bullish, you never long the higher low","It guarantees every long wins","It removes the need for stops","It only works on weekends"],"You wait for confirmation from the lower structure. No confirmation means no trade."],
+["What does 'low time frame breaks start the high time frame pivot points' mean?",["High time frame pivots are often triggered by lower time frame breaks, but the high time frame is still the most important","Low time frames matter more","High time frames are ignored","Pivots only form on the 1-minute"],"Lower breaks help you anticipate pivots, while the high time frame remains king."],
+["Which situation is a warning sign when using the domino effect?",["The low time frame breaks back to bullish, but breaks back to bearish before the mid time frame breaks","The low time frame breaks bullish and the mid follows","Price gaps up","Volume dries up"],"If the low time frame structure flips back bearish before the mid time frame breaks bullish, price may head lower again."],
+["After wicking the high, what suggests a full rotation down?",["Mid time frame structure from the low up breaking back to bearish","Price staying above the wick high","Low time frame structure from the top down breaking bullish","A large green candle"],"Breaking the mid structure from the low up after the wick supports scenario 1."]
+]}
+,{id:"rwhat",group:"Ranges",name:"What a range is and why it forms",desc:"Sideways price and the buyer/seller balance",qs:[
+["What is a range?",["Price moving sideways, also called a consolidation phase","A strong move up or down","A gap between two candles","The distance between a high and a low in a trend"],"Markets can trend up, trend down, or move horizontally. Horizontal movement is a range."],
+["Why might price range after an aggressive expansion?",["Buying and selling pressure may become more balanced for a while","Brokers pause trading","Volume always drops to zero","Candles can only expand a limited amount"],"After a strong move, buying and selling pressure may balance out temporarily. Price can consolidate before continuing or reversing; neither outcome is guaranteed."],
+["What is the analogy used for ranging after a pump or dump?",["A sprinter who gets tired and needs to refuel","A car with a full tank","A ball bouncing in a box","A wave hitting a wall"],"After sprinting, the market needs to gather energy before going again."],
+["What can follow a range?",["Either a continuation or a reversal","Only a continuation","Only a reversal","Always a breakout upward"],"The range rebalances things, and then price can go either way."],
+["Why does understanding ranges matter for the TCT schematics?",["The schematics are built around ranges and range deviations","They replace market structure","They only matter on the 1-minute","They predict exact prices"],"Ranges and deviations are the foundation for the TCT schematics."]
+]}
+,{id:"rpull",group:"Ranges",name:"Pulling and confirming a range",desc:"Direction, equilibrium and validity",qs:[
+["You are in an uptrend making higher lows and higher highs. How do you pull the range?",["From top to bottom (high to low)","From bottom to top","From the open to the close","From the equilibrium outward"],"In an uptrend you pull from the high down to the low."],
+["You are in a downtrend. How do you pull the range?",["From bottom to top (low to high)","From top to bottom","Using the most recent candle only","You don't pull one in a downtrend"],"In a downtrend you pull from the low up to the high."],
+["When is a range confirmed?",["When price moves back and touches the equilibrium (0.5) of the range","As soon as you draw the high and low","When price closes beyond the range high","After two weeks"],"The touch of the equilibrium is the confirmation."],
+["What is the equilibrium of a range?",["The 0.5 level between the range high and range low","The 0.3 level","The high of the range","The average of the last five candles"],"The 0.5 fib of the high-to-low range is the equilibrium."],
+["Is a confirmed range low in an uptrend automatically a market structure low?",["No, the structure low is only confirmed when price touches the structure high, which comes later","Yes, always at the same time","Yes, but only on the daily","Only if the range was deeper than 50%"],"The range low is confirmed on the equilibrium touch, before the market structure low is confirmed."],
+["When is a range valid on a given time frame?",["When the six candle rule applies there: 2 candles up, 2 down, 2 up (or the reverse in a downtrend)","When it has at least 10 candles","When price touches the equilibrium twice","When volume is rising"],"The same 2-2-2 rule used for market structure decides whether a range exists on that time frame."],
+["A range keeps deviating its high, and each deviation is smaller than the last, before a rotation down. Where did the range originally start?",["Where the six candle rule and equilibrium touch first applied, with the range then extending to include the deviations","At the highest deviation high","At the final low","At the first candle of the day"],"The original range started at the first valid low and high, then expanded as the deviations came."]
+]}
+,{id:"rdev",group:"Ranges",name:"Deviations",desc:"Wicks, bad breaks and what to expect",qs:[
+["What is a deviation?",["Price exceeds the range high or low but does not break it","Price closes beyond the range high or low","Price ranges for a long time","A candle with no wick"],"The level is exceeded without a real break."],
+["Price deviates the range high. What can you expect?",["A reversal towards the range low, or close to it","A move to the next high","Nothing in particular","An immediate break of structure"],"A deviation at the top suggests a rotation back to the bottom of the range."],
+["Price deviates the range low. What can you expect?",["A move back up towards the range high, or at least well into the upper section","A continued move down","A flat market","A shift in time frame"],"The mirror of a high deviation: expect a rotation up to the range high or just short of it."],
+["Why are wicks the easiest deviations?",["A wick is never a break of structure in the first place","They are always bigger","They have more volume","They only happen at highs"],"If price never closes beyond the level, it never broke structure at all."],
+["What is a candle-close deviation?",["A bad break of structure: a close beyond the level, then the next candle closes back inside","A candle with a long body","A wick beyond the range","A gap through the level"],"Bad breaks (no distance, immediate close back inside) fall into the deviation category."],
+["A break looks real on the 30-minute chart. Why check the highest time frame the range is valid on?",["On a higher time frame, that same move could just be wicks or a bad break, so a deviation","Higher time frames show more candles","The 30-minute is always wrong","Ranges only exist on the 4-hour"],"Always check the highest time frame the range is valid on, because a break on a lower one can be a deviation on a higher one."],
+["How does the time frame change how strict you are with deviations?",["Lower time frame ranges get stricter, expecting quick wicks or immediate returns; higher time frame deviations can be deeper and slower","Lower time frames allow bigger deviations","They are the same","Only higher time frames use deviations"],"Higher time frames move slower and take more time to trap people, so deviations can be deeper. On lower time frames, deviations are expected to be quick and clean."]
+]}
+,{id:"rdl",group:"Ranges",name:"The deviation limit (DL)",desc:"The 30% rule and how to use it",qs:[
+["What is the deviation limit (DL)?",["A limit on how far price can deviate, based on the size of the range","A time limit on deviations","The maximum number of deviations","The range high itself"],"It is a threshold used to tell a deviation from a real range break."],
+["In this trading framework, how far beyond the range high or low is the deviation limit (DL) set?",["30% of the range size","50% of the range size","10% of the range size","100% of the range size"],"Here, the deviation limit is set 30% of the range size beyond each edge. This is a rule of the framework being studied, not a universal market rule."],
+["How can you draw the DL with the fib retracement tool?",["Add the 1.3 and -0.3 levels","Add the 0.3 and 0.7 levels","Add the 1.618 and -0.618 levels","Add the 0.5 level only"],"1.3 and -0.3 put the DL 30% above the range high and 30% below the range low."],
+["Price breaks the range high but does not close above the DL. What is it?",["Still a deviation","A confirmed break of structure","A new range","A shift in time frame"],"You do not want a close beyond the DL when calling something a deviation."],
+["Price deviates the high without closing above the DL and comes back inside. What do you do with the range?",["Extend the range high to the deviation high, which also moves the DL","Delete the range","Pull a new range from the low","Leave it unchanged"],"The range expands to include the deviation high, so the DL (30% of the new size) grows too."],
+["The DL overlaps a good-looking demand zone below the range. How do you treat it?",["Picture the DL just below the demand zone","Ignore the demand zone","Use a 50% DL","Treat any close in the zone as a break"],"A close inside a good demand zone can still bounce, so the DL is imagined below it (or above a supply zone)."],
+["Why not allow very large deviations?",["When a deviation is too big it looks more like market structure","Large deviations are impossible","Brokers cancel them","They only occur in uptrends"],"A big move beyond the range starts to look like structure, which is why the limit is around 30%."]
+]}
+,{id:"rnest",group:"Ranges",name:"Ranges within ranges",desc:"Premium, discount and nested ranges",qs:[
+["What is premium and discount in a range?",["Above the equilibrium is premium, below it is discount","Premium is the whole range, discount is outside it","Premium is the low, discount is the high","They are only used in trends"],"From the 0.5 up to the range high is premium, and from the 0.5 down to the range low is discount."],
+["Price is rotating inside a range. Should you try to draw market structure from the range low up to the high?",["No, watch the most recent expansion instead","Yes, always","Yes, but only on daily","Only in a downtrend"],"Inside a range you do not trend, so you just look at the most recent rotation to see which structure matters."],
+["How common are ranges within ranges?",["Almost all the time","Rare","Only on high time frames","Only in crypto"],"Almost every chart has ranges inside ranges, depending on the time frame."],
+["Why can one chart have several ranges at once?",["Overlapping market structure, such as high, mid and low time frame structure, gives different ranges","Different indicators","Different brokers","Random chance"],"Each level of structure can give its own range."],
+["Inside a high time frame uptrend range, price makes a local downtrend on a lower time frame. How do you pull the local range?",["From bottom to top","From top to bottom","Don't pull one","Use the equilibrium as the anchor"],"A local downtrend means you pull from bottom to top, even though the bigger picture is up."],
+["Which range matters more?",["The higher time frame range","The lower time frame range","The smallest one","They are equal"],"The same principle as market structure: higher time frame points are more important."],
+["Can price rotate between premium and discount many times before breaking out?",["Yes, many internal rotations without taking the extreme high or low","No, it must break out after one rotation","Only twice","Only on the daily"],"Price can rotate many times inside a range before taking the main extreme."]
+]}
+,{id:"rgood",group:"Ranges",name:"Good vs bad ranges",desc:"Be rational about what you call a range",qs:[
+["A range can be technically valid but not good. What is the lesson?",["Be rational: a range is price going sideways","Always trust the rule over the chart","Only use the highest time frame","Ranges don't need to look horizontal"],"A range is horizontal price action, so the picture has to look like one."],
+["What does a V-shaped, sharp move usually look like?",["More like market structure than a range","A perfect range","A deviation","A gap"],"Sharp V shapes tend to be structure. When the V gets very extended and wide, it behaves like a range."],
+["What makes a good-looking range?",["Horizontal price action with a wide, extended shape","A tall V","A straight line","Only one candle"],"You want price visibly moving sideways."],
+["A high time frame range is V-shaped, while a lower time frame range inside it moves sideways cleanly. Where should most of your attention go?",["The cleaner, sideways lower time frame range","The high time frame V","Neither","The 1-minute chart"],"Both are technically valid, but the rational, clean range gets the attention."],
+["In a sharp V-shaped downtrend you wick the low. Why be careful calling that a clean range?",["The SFP can be temporary, and price can come back down if structure breaks instead of fully rotating up","Wicks are always wrong","Ranges can't have wicks","A wick cancels the range"],"After a wick, a rotation isn't guaranteed. A later break of structure can take price back to the SFP."]
+]}
+
+,{id:"sdwhat",group:"Supply and demand",name:"What supply and demand are",desc:"Why price reacts when it returns",qs:[
+["What does a supply area represent?",["An area where there were significantly more sellers than buyers, causing an expansion down","An area where price moved sideways","A level with high volume only","The highest price of the month"],"Sellers stepped in at a price and pushed it lower. When price returns, we can expect a reaction."],
+["Why do we expect a reaction when price returns to a supply or demand area?",["The same participants are expected to protect their positions there","Charts repeat exactly","The broker closes trades","Volume resets"],"The idea is that those who pushed price away will defend their positions when price comes back."],
+["What does a demand area represent?",["An area with significantly more buyers than sellers, causing an expansion up","The lowest close of the week","A sideways range","A gap down"],"The mirror of supply: buyers stepped in and drove price higher."],
+["What do supply and demand zones give a trader?",["Points of interest (POIs) where a trade could potentially form","Guaranteed entries","A replacement for structure","Exact exit prices"],"They are areas to watch, and you then wait for confirmation."]
+]}
+,{id:"sdob",group:"Supply and demand",name:"Order blocks and fair value gaps",desc:"The OBIF: order block with inefficiency",qs:[
+["What is a bullish order block?",["The last bearish candle before an expansion up that leaves a fair value gap","The first bullish candle of a trend","Any bearish candle in a range","The biggest candle on the chart"],"It is the last down candle before the expansion away, as long as a fair value gap is left."],
+["What is a bearish order block?",["The last bullish candle before a bearish expansion that leaves a fair value gap","The last bearish candle in a downtrend","A gap up","A candle with no wick"],"It is the mirror: the last up candle before the expansion down."],
+["What is a fair value gap?",["Candle one's high and candle three's low (for a bullish gap) don't touch, leaving only a body candle between","Any gap between sessions","Two candles with overlapping wicks","A candle with a large body"],"It is a three-candle formation where the first and third candles' wicks do not connect, leaving an inefficiency."],
+["Is an order block valid without a fair value gap?",["No, the inefficiency is required","Yes, always","Only on the daily","Only in a range"],"No inefficiency, no valid order block. That is why it is called an OBIF (order block with inefficiency)."],
+["Which part of the candle is the order block?",["The whole candle including its wicks","The body only","The wick only","The close only"],"You grab the wick low and wick high, whichever candle they belong to."],
+["How many candles are needed to confirm an order block?",["Three: the order block candle, the expansion candle, and the candle confirming the gap","One","Two","Six"],"You need the order block candle, the expansion, and the third candle that confirms the fair value gap."],
+["Why can adding a fair value gap strengthen an order-block setup?",["The zone and nearby inefficiency provide two pieces of confluence that price may revisit","The gap is always filled immediately","The gap cancels the order block","It guarantees the zone will hold"],"The order block and fair value gap can provide confluence if price revisits the area, but neither a revisit nor a reaction is guaranteed."]
+]}
+,{id:"sdstruct",group:"Supply and demand",name:"Structure supply and demand",desc:"Multi-candle zones and refined areas",qs:[
+["What is structure supply or demand?",["A supply or demand area represented by multiple candles","A single candle zone","A zone with no fair value gap","A zone drawn only on weekly charts"],"It is the same idea as an order block but made of several candles."],
+["Why is it called structure supply?",["Because it follows structure, like using the whole move up before a lower high and expansion down","Because it needs a structure low","Because it is only drawn at highs","Because it uses indicators"],"It lines up with the structure you are already drawing, such as lower highs and lower lows."],
+["Does structure supply and demand still need the fair value gap?",["Yes, the inefficiency rule applies","No","Only for demand","Only on lower time frames"],"The inefficiency rule is used for structure zones too."],
+["Where do refined zones come from?",["Overlapping lower time frame structure inside the bigger zone","Random picks","Volume spikes","Using a wider zone"],"Lower time frame structure inside a larger zone lets you draw a more refined area."],
+["What is the one exception to the inefficiency rule?",["When it is the only zone nearby and it had a tiny mitigation, you draw it above (supply) or below (demand) the mitigation","When price gaps","On weekends","When the zone is large"],"Only when there is no other zone close by, and the mitigation was tiny."]
+]}
+,{id:"sdwhere",group:"Supply and demand",name:"Where to look for zones",desc:"Context first, then zones",qs:[
+["Should you randomly pull order blocks wherever you see one?",["No, build context first with structure and ranges","Yes, any zone works","Only on the daily","Only when price is trending"],"Context is key. Structure and ranges come first, and zones add detail."],
+["What are the three main locations to look for supply and demand?",["Pivot points, supply in the upper (and demand in the lower) section of a range, and supply above or demand below a range for deviations","Highs, lows and the close","Round numbers","Gaps, wicks and volume"],"Pivot points in structure, premium and discount within a range, and beyond the range for deviations."],
+["Within a range, where do you preferably look for bullish order blocks or demand?",["The lower (discount) section","The upper (premium) section","Anywhere","Above the range high"],"Demand sits in the discount half, to rotate back up. Supply sits in the premium half."],
+["In a downtrend expecting a lower high, where is the pivot point order block?",["At the lower high","At the low","At the range low","At the equilibrium"],"The pivot point order block lines up with the structure you already expected."],
+["After an order block is mitigated and price expands away, can you use it again?",["No, but refined areas inside it may still be unmitigated","Yes, it works again","Only on lower time frames","Yes, if it is bigger"],"A mitigated block is not used anymore, but a more refined area can still be fresh."],
+["What is extreme supply?",["The last supply remaining before price reaches the range high","The biggest supply on the chart","Supply in the discount","Supply with the most wicks"],"Extreme supply (and extreme demand) loves to give reactions."],
+["What is a supply chain?",["One order block creating another order block, and the reaction from the second tends to be strong","A list of all zones","Supply above a range","A chain of mitigated zones"],"The second block in a clean chain often gives a very strong reaction."],
+["How do you find zones on the chart?",["Scan through time frames, not fixed ones, looking for blocks with inefficiency","Only use the 4-hour","Only use the 1-minute","Always use the daily"],"Flick through time frames to see where a good zone sits. A higher time frame block that is also unmitigated on a lower one is even better."]
+]}
+,{id:"lqwhat",group:"Liquidity",name:"What liquidity is",desc:"Stop losses, buy side and sell side",qs:[
+["In this context, what does liquidity mostly refer to?",["Where the most stop losses are located","How much cash a trader holds","The number of open charts","The size of a company"],"In this framework, stop clusters are watched because triggered orders can provide counterparties. Liquidity in markets has a broader meaning too."],
+["A trader is long and their stop-loss gets hit. What does it create?",["A sell order, since the position is sold back to the market at a lower price","A buy order","No order","A limit order above price"],"Stops on long trades are sell orders, which is why they sit as sell side liquidity below lows."],
+["A trader is short and their stop-loss gets hit. What does it create?",["A buy order, since the position is bought back at a higher price","A sell order","Nothing","A take-profit"],"Stops on short trades are buy orders, which is why they sit as buy side liquidity above highs."],
+["Where does buy side liquidity sit?",["Above highs, where short sellers' stop losses are","Below lows","At the equilibrium","At round numbers only"],"Stops on short positions above a high can trigger buy orders when hit; traders call this buy-side liquidity."],
+["Where does sell side liquidity sit?",["Below lows, where long traders' stop losses are","Above highs","Inside the candle body","At the open"],"Stops on long positions below a low can trigger sell orders when hit; traders call this sell-side liquidity."],
+["In a liquidity-based trading model, why might a cluster of stop orders matter to a large participant?",["Triggered stops can provide opposing orders that may help fill a large position","Stops guarantee that price will reverse","Every market participant can see every stop order","A cluster of stops removes market risk"],"Triggered stops can add opposing orders, but this model does not prove that a participant deliberately pushed price there or guarantee what happens next."],
+["A large player wants to fill a big short position. Which liquidity helps most?",["Buy side liquidity above highs","Sell side liquidity below lows","The equilibrium","Liquidity in the discount"],"Triggered short stops become buy orders, which they can sell into."],
+["What does 'markets move from liquidity to liquidity' mean?",["Price tends to travel from one cluster of stops to the next","Price always moves in a straight line","Volume decides direction","Highs must always be broken"],"In this framework, traders watch the next obvious stop cluster as a possible destination after one pool is swept; price is not guaranteed to travel there."],
+["Why can it feel like your stop-loss is a target?",["Obvious stop clusters can attract price, but a stop being hit does not guarantee an immediate reversal.","Brokers see your stop","Stops move price themselves","It is random"],"Obvious stop locations are exactly what price tends to reach for."]
+]}
+,{id:"lqwhere",group:"Liquidity",name:"Where the most liquidity sits",desc:"Ranges and trending structure",qs:[
+["In a range, where is the most liquidity?",["Above the range high and below the range low","At the equilibrium","In the middle third","Only at the open"],"The range high and low are obvious invalidation points for many traders, so stops may cluster just beyond them."],
+["In an uptrend, which structure point holds the most liquidity?",["The market structure low","The market structure high","The equilibrium","The open"],"In this framework, stops from long positions may cluster below the structure low, while stops from short positions may cluster above highs."],
+["In a downtrend, which structure point holds the most liquidity?",["The market structure high","The market structure low","The equilibrium","The close"],"In this framework, stops from short positions may cluster above the structure high, and some traders trail them as price moves."],
+["Why do stops cluster beyond structure points?",["Traders entering on breaks put their invalidation beyond the opposite structure point and often trail it","Brokers require it","Indicators put them there","It is a rule of the exchange"],"Sellers and buyers use the obvious level as their invalidation, which stacks stops in the same place."],
+["Short sellers in a range typically sell in the upper section. Where does their stop go?",["Above the range high","Below the range low","At the equilibrium","At the open"],"For a short entered near the upper range, a stop above the range high is a common invalidation and can add to buy-side liquidity."]
+]}
+,{id:"lqdev",group:"Liquidity",name:"Deviations and liquidity",desc:"Reading takes of the high and low",qs:[
+["Price takes the range high within the deviation limit and closes back inside. What does it imply?",["Buy side liquidity was grabbed, which can let large players fill shorts, and price may rotate to the range low","A confirmed breakout","Nothing yet","A new higher range"],"If price returns inside the range, the opposite side can become a possible target; wait for confirmation rather than assuming it must happen."],
+["Why can taking the range high add fuel to a drop?",["Traders long the 'break' or higher low get stopped out, adding sell orders to the move","Their stops are buy orders","It reduces selling","It resets the range"],"Stopped-out longs sell, adding to the cascade."],
+["An uptrend makes a higher low and a higher high. What should you check before assuming continuation?",["Whether the break stays within the deviation limit, i.e. is it a deviation or a real break","The moon phase","Whether volume supports the move","The previous day's close"],"A close beyond the limit is a break, while staying within it points to a deviation."],
+["In an uptrend, price wicks below the structure low but closes back above. What liquidity was taken?",["Sell side liquidity, which can let large players fill buys and rotate price to the opposite structure point","Buy side liquidity","None","Only supply"],"A wick below the low sweeps long stops, which can be used to fill buys."],
+["Price repeatedly takes the range high but never takes the range low. What does that suggest?",["Buy side liquidity has been taken repeatedly, leaving sell side liquidity as the next target","The range is about to break up","Nothing changes","The range low will hold forever"],"If other evidence supports a rotation, the untouched liquidity can become a possible target; it is not guaranteed."],
+["What is a useful way to read a break or deviation?",["Ask where the stops are and what a large player would need price to do to fill their position","Follow the last candle colour","Assume the trend continues","Only look at indicators"],"Thinking about who needs what orders helps you avoid being the liquidity."]
+]}
+,{id:"lqtrend",group:"Liquidity",name:"Trend lines and liquidity curves",desc:"Why common patterns get run",qs:[
+["Why do trend lines often fail?",["They are so widely used that stops cluster along them, making them liquidity","They never connect highs","They only work on weekends","Charts ignore lines"],"Because many traders watch the same lines, stops may cluster nearby; that can make them a liquidity area, but it is not a guaranteed target."],
+["Price is making lower highs along a trend line. How should it be viewed?",["As trend line liquidity, with the highs likely to be taken","As a reliable line to short from","As a range","As demand"],"Stops from short positions may cluster above successive lower highs; if those stops trigger, they add buy orders."],
+["What is a liquidity curve?",["Price trending in a way that the highs or lows get sharper, so they can't be connected with a straight line","A perfectly straight trend","A flat range","A fair value gap"],"The pivots curve up (or down) instead of lining up on a straight trend line."],
+["What extra requirement makes a good liquidity curve in an uptrend?",["No good demand backing each higher low","Large wicks","A gap at every low","High volume"],"You want pure stop losses at the lows, not zones where large players are expected to defend."],
+["In a downtrend, what should be absent for a good liquidity curve?",["Supply backing the lower highs","Wicks","Volume","Any gaps"],"The highs should be pure stops, with no supply behind them."],
+["Why is demand at the lows unwanted in a liquidity curve?",["Demand suggests large players will protect that area instead of letting the low simply be swept","It makes the curve too smooth","It lowers volume","It causes gaps"],"A zone defended by large players makes the low less likely to be a clean liquidity pool."]
+]}
+,{id:"lqrtz",group:"Liquidity",name:"Return to zone",desc:"Is the path to the target clear?",qs:[
+["What does a good return to zone look like?",["Only liquidity and no opposing supply or demand between your entry and the target","A big supply zone in the way","Many gaps","A tight range"],"A path with little opposing supply or demand may offer less resistance, but price can still reverse or stall."],
+["You are short and the path down to the range low is only a series of higher lows with no demand. What happens when the first low is taken?",["Stops trigger sell orders and can snowball into a cascade down","Price bounces","Price pauses","Nothing"],"Triggered stops can add sell orders and contribute to a cascade, alongside other market activity."],
+["For a long toward the range high, what makes the path easier?",["No supply above, just trend line liquidity","A big supply zone just above","A wide spread","A recent gap down"],"Nothing is holding price down, and taking the highs triggers buy orders."],
+["How can stop-loss triggers contribute to an aggressive drop after a low is swept?",["They can add sell orders that accelerate the move alongside other selling","They automatically cancel all buy orders","They guarantee that every trader opens a short","They prevent price from bouncing"],"Stops on long positions become sell orders when triggered. These orders can add momentum, although they are not necessarily the only cause of a sharp move."],
+["After a sweep of the highs, what does an untouched low represent?",["Sell side liquidity that is the next obvious target","A broken level","A resistance","A gap"],"Markets tend to rotate toward the opposite liquidity."]
+]}
+
+,{id:"fd1",group:"Pick the chart",name:"Structure and ranges: which figure?",desc:"Choose the matching chart",qs:[
+["Which figure shows valid uptrend structure under the six candle rule (2 up, 2 down, 2 up)?",[
+fig([[20,32,18,30],[30,44,28,42],[42,44,34,36],[36,38,26,28],[28,46,26,44],[44,60,42,58]]),
+fig([[20,32,18,30],[30,44,28,42],[42,44,34,36],[36,52,34,50],[50,62,48,60],[60,72,58,70]]),
+fig([[20,34,18,32],[32,34,24,26],[26,28,16,18],[18,40,16,38],[38,56,36,54],[54,70,52,68]]),
+fig([[20,32,18,30],[30,44,28,42],[42,46,32,34],[40,44,34,35],[35,52,33,50],[50,64,48,62]])
+],"The correct figure has two bullish candles, two bearish candles, then two bullish candles, each trading beyond the last. The others have a single-candle retracement, a single-candle first leg, or an inside bar in the retracement.",1],
+["The dashed line is the structure high. Which figure shows a break of structure?",[
+fig([[40,50,38,48],[48,56,46,54],[54,70,52,68],[68,76,64,74],[74,82,70,80]],{lines:[[60,"#8a96a3",1]]}),
+fig([[40,50,38,48],[48,56,46,54],[54,68,52,56],[56,58,44,46],[46,48,36,38]],{lines:[[60,"#8a96a3",1]]}),
+fig([[40,50,38,48],[48,56,46,54],[54,59,52,57],[57,58,46,48],[48,50,38,40]],{lines:[[60,"#8a96a3",1]]}),
+fig([[44,52,42,50],[50,56,48,54],[54,57,50,52],[52,54,44,46],[46,48,38,40]],{lines:[[60,"#8a96a3",1]]})
+],"A break of structure needs a close beyond the level, with follow-through. One wrong figure is a wick that closes back below, and the other two never close above it.",1],
+["Inside a range, which figure marks the area where you would preferably look for demand?",[
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[5,6,22,34]]}),
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[2,3,66,78]]}),
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[3,4,44,56]]}),
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[2,3,82,94]]})
+],"Demand is preferred in the discount (lower) half. The wrong figures mark premium, a zone straddling the equilibrium, or a zone above the range high.",1],
+["Solid lines are the range high and low; dashed lines are the 30% deviation limits. Which figure shows a deviation, not a range break?",[
+fig([[40,50,38,48],[48,58,46,56],[56,66,52,58],[58,60,44,46],[46,48,30,32]],{lines:[[60],[20],[72,"#8a96a3",1],[8,"#8a96a3",1]]}),
+fig([[44,52,42,50],[50,58,48,56],[56,76,54,74],[74,84,72,82],[82,92,80,90]],{lines:[[60],[20],[72,"#8a96a3",1],[8,"#8a96a3",1]]}),
+fig([[44,52,42,50],[50,54,40,42],[42,44,24,26],[26,28,10,12],[12,14,2,4]],{lines:[[60],[20],[72,"#8a96a3",1],[8,"#8a96a3",1]]}),
+fig([[44,52,42,50],[50,56,48,54],[54,57,50,52],[52,56,46,48],[48,52,44,46]],{lines:[[60],[20],[72,"#8a96a3",1],[8,"#8a96a3",1]]})
+],"A deviation exceeds the range high without closing beyond the limit and returns inside. Two wrong figures close beyond the limit and keep going, and the other never leaves the range.",1]
+]}
+,{id:"fd2",group:"Pick the chart",name:"Supply and demand: which figure?",desc:"Choose the matching chart",qs:[
+["Which figure shows a bullish fair value gap (the shaded area)?",[
+fig([[30,36,28,34],[34,60,32,58],[58,66,56,64]],{boxes:[[0,2,36,56,"#1aa6a6"]]}),
+fig([[30,44,28,38],[38,60,36,58],[58,66,30,64]],{boxes:[[0,2,30,44,"#1aa6a6"]]}),
+fig([[60,64,56,58],[58,60,30,32],[32,34,24,26]],{boxes:[[0,2,34,56,"#1aa6a6"]]}),
+fig([[30,44,28,34],[34,48,32,46],[46,54,30,52]],{boxes:[[0,2,30,44,"#1aa6a6"]]})
+],"A bullish gap exists when candle one's high sits below candle three's low, leaving only a body between them. Two wrong figures have overlapping wicks, and the other is a bearish gap.",1],
+["Which figure marks a valid bullish order block with inefficiency?",[
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68]],{boxes:[[1,1,30,44]]}),
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,40,56]],{boxes:[[1,1,30,44]]}),
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68]],{boxes:[[2,2,30,64]]}),
+fig([[30,40,28,38],[38,50,36,48],[48,50,16,18],[18,24,10,12]],{boxes:[[1,1,36,50]]})
+],"A bullish order block is the last down candle before the expansion up that leaves a gap. The wrong figures have no gap, mark the expansion candle instead, or show a bearish block.",1],
+["Which figure marks a valid bearish order block with inefficiency?",[
+fig([[30,40,28,38],[38,50,36,48],[48,50,16,18],[18,24,10,12]],{boxes:[[1,1,36,50]]}),
+fig([[30,40,28,38],[38,50,36,48],[48,50,16,18],[18,24,10,12]],{boxes:[[2,2,16,50]]}),
+fig([[30,40,28,38],[38,50,36,48],[48,50,16,18],[18,44,10,40]],{boxes:[[1,1,36,50]]}),
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68]],{boxes:[[1,1,30,44]]})
+],"A bearish order block is the last up candle before an expansion down that leaves a gap. The wrong figures mark the expansion candle, have no gap, or show a bullish block.",1],
+["The shaded box is a demand zone. In which figure is it still unmitigated (usable)?",[
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68],[68,76,64,74],[74,82,70,80],[80,88,76,86]],{boxes:[[1,6,30,44]]}),
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68],[68,76,64,74],[74,76,56,58],[58,60,40,44],[44,64,42,62]],{boxes:[[1,7,30,44]]}),
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68],[68,76,64,74],[74,76,52,54],[54,56,36,38],[38,40,22,24]],{boxes:[[1,7,30,44]]}),
+fig([[50,52,40,42],[42,44,30,32],[32,64,30,62],[62,70,58,68],[68,76,64,74],[74,76,50,52],[52,54,28,46],[46,66,44,64]],{boxes:[[1,7,30,44]]})
+],"In the correct figure price never returned to the zone. In the others price came back into it (bounced, broke through, or wicked it), so it has been mitigated.",1]
+]}
+
+,{id:"fd3",group:"Pick the chart",name:"Liquidity: which figure?",desc:"Choose the matching chart",qs:[
+["Which figure shows a liquidity curve in an uptrend (the lows rise more and more sharply)?",[
+fig([[20,24,10,12],[12,30,11,28],[28,30,18,20],[20,44,19,42],[42,44,32,34],[34,64,33,62],[62,66,52,54],[54,92,53,90]]),
+fig([[20,24,10,12],[12,30,11,28],[28,30,22,24],[24,42,23,40],[40,42,34,36],[36,54,35,52],[52,54,46,48],[48,66,47,64]]),
+fig([[88,90,78,80],[80,90,79,88],[88,89,66,68],[68,78,67,76],[76,77,48,50],[50,58,49,56],[56,57,20,22],[22,28,20,26]]),
+fig([[50,58,48,56],[56,60,50,52],[52,58,46,56],[56,60,48,50],[50,58,46,56],[56,60,48,50],[50,58,48,56],[56,60,50,54]])
+],"A liquidity curve in an uptrend has higher lows that steepen, so they can't sit on one straight line. The others are a steady trend, a downtrend, and a range.",1],
+["Which figure marks the zone holding the most buy side liquidity in this range?",[
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[2,3,79,86]]}),
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[5,6,14,21]]}),
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[3,4,46,54]]}),
+fig([[50,58,48,56],[56,70,54,68],[68,78,66,76],[76,78,60,62],[62,64,40,42],[42,44,24,26],[26,48,22,46]],{lines:[[78],[22],[50,"#8a96a3",1]],boxes:[[5,6,22,34]]})
+],"Buy side liquidity sits just above the range high, where short sellers' stops are. Below the low is sell side liquidity, and the middle and lower half hold no obvious cluster.",1],
+["Which figure shows a sell side liquidity grab: a wick below the range low that closes back inside, then rotates up?",[
+fig([[44,52,42,50],[50,54,38,40],[40,42,26,28],[28,30,14,24],[24,44,22,42],[42,56,40,54]],{lines:[[60],[20]]}),
+fig([[40,50,38,48],[48,58,46,56],[56,66,52,58],[58,60,44,46],[46,48,30,32],[32,34,24,28]],{lines:[[60],[20]]}),
+fig([[44,52,42,50],[50,54,38,40],[40,42,24,26],[26,28,10,12],[12,14,2,4],[4,10,0,8]],{lines:[[60],[20]]}),
+fig([[44,52,42,50],[50,54,38,40],[40,42,28,30],[30,40,26,38],[38,50,36,48],[48,56,44,54]],{lines:[[60],[20]]})
+],"The correct figure sweeps below the low, closes back inside and rotates up. The others grab the high instead, break down and keep falling, or never take the low.",1]
+]}
+
+];
+
+const ALL = SECTIONS.flatMap(s => s.qs.map((q,i) => ({id:s.id+i, sec:s.name, q:q[0], opts:q[1], why:q[2], fig:!!q[3]})));
+const $ = id => document.getElementById(id);
+const dateKey = (date) => { const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,"0"), d=String(date.getDate()).padStart(2,"0"); return y+"-"+m+"-"+d; };
+const today = () => dateKey(new Date());
+const dayOffset = (days) => { const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+days); return dateKey(d); };
+const load = () => { try { return JSON.parse(localStorage.getItem("tct") || "{}"); } catch(e){ return {}; } };
+const save = () => { try { localStorage.setItem("tct", JSON.stringify(state)); } catch(e){} };
+let state = load(); state.got = state.got || {};
+let qs = [], i = 0, right = 0, picked = null, answered = false, daily = false;
+
+function seeded(seed){ let a = 0; for (const c of seed) a = (a*31 + c.charCodeAt(0)) >>> 0; return () => (a = (a*1664525 + 1013904223) >>> 0) / 4294967296; }
+function shuffle(arr, rand){ const a = arr.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(rand()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+function streakNow(){ const y = dayOffset(-1); return (state.last === today() || state.last === y) ? (state.streak||0) : 0; }
+function prizeFor(streak){ if(streak >= 21) return {key:"cinema", title:"CINEMA DATE 🎬", message:"21 days of consistency — you’ve unlocked a cinema date! Pick the film and my treat 💛"}; if(streak >= 14) return {key:"dinner", title:"DINNER DATE 🍝", message:"14 days of brilliant effort — you’ve earned a dinner date. My treat 💛"}; if(streak >= 5) return {key:"coffee", title:"COFFEE DATE ☕", message:"5 days in a row — you’ve unlocked a coffee date with me! My treat ☕💛"}; return null; }
+function preparePrizeEmail(prize, streak){
+ const box=$("prizeBox"); box.classList.remove("hide"); $("prizeMsg").textContent=prize.message;
+ const email=$("emailPrize");
+ if(PRIZE_EMAIL === "YOUR_EMAIL_HERE"){ email.href="#"; email.onclick=(e)=>{e.preventDefault(); $("emailHelp").textContent="To enable this, replace YOUR_EMAIL_HERE near the top of the HTML with your email address, then upload the updated file."; $("emailHelp").classList.remove("hide"); }; }
+ else { const subject=encodeURIComponent("Sofie won: "+prize.title); const body=encodeURIComponent("Hiii! It’s Sofie 💛 I just unlocked my "+prize.title+" reward after a "+streak+"-day correct daily quiz streak!\n\nQuiz score today: "+right+"/"+qs.length+"\nPlease redeem my prize 😇"); email.href="mailto:"+encodeURIComponent(PRIZE_EMAIL)+"?subject="+subject+"&body="+body; email.onclick=null; }
+}
+function show(id){ ["home","quiz","done"].forEach(s => $(s).classList.toggle("hide", s !== id)); }
+
+function updatePrizeProgress(){
+ const streak = streakNow(); const prizes=state.prizes||{};
+ const items=[{key:"coffee",days:5,label:"coffee"},{key:"dinner",days:14,label:"dinner date"},{key:"cinema",days:21,label:"cinema date"}];
+ items.forEach(item=>{
+  const won=!!prizes[item.key], count=$(item.key+"Count"), bar=$(item.key+"Progress"), note=$(item.key+"Note");
+  count.textContent=won?"Unlocked! 🎉":Math.min(streak,item.days)+" / "+item.days+" days";
+  bar.style.width=(won?100:Math.min(streak/item.days,1)*100)+"%";
+  note.textContent=won?item.label.charAt(0).toUpperCase()+item.label.slice(1)+" prize already earned — enjoy!":streak>=item.days?"You’ve reached this reward milestone!":(item.days-streak)+" more "+(item.days-streak===1?"day":"days")+" to unlock your "+item.label+".";
+ });
+ $("progressIntro").textContent = streak ? "You’re on a "+streak+"-day correct streak. Keep scoring 4/5 or more in the daily mix to unlock your treats!" : "Get 4/5 or more in the daily mix to build your streak and unlock treats.";
+}
+function home(){
+ $("streak").textContent = streakNow() + " day streak";
+ $("hello").firstChild.textContent = "Hi " + FRIEND_NAME + ", your current daily streak is: "; $("streakValue").textContent = streakNow() + (streakNow() === 1 ? " day" : " days"); $("brand").textContent = FRIEND_NAME + "’s trade practice";
+ updatePrizeProgress();
+ const d = state.last === today();
+ $("status").textContent = d ? "Today's mix is done. Keep going with a section below, or come back tomorrow for your streak." : "Five questions from across everything you've learned.";
+ $("daily").textContent = d ? "Redo today's mix" : "Start today's mix";
+ $("secs").innerHTML = "";
+ const groups = new Map();
+ SECTIONS.forEach(s => {
+  if (!groups.has(s.group)) {
+   const details = document.createElement("details"); details.className = "category";
+   const summary = document.createElement("summary"); summary.textContent = s.group;
+   const content = document.createElement("div"); content.className = "cat-content";
+   details.appendChild(summary); details.appendChild(content); $("secs").appendChild(details);
+   groups.set(s.group, content);
+  }
+  const n = s.qs.length, g = s.qs.filter((_,k) => state.got[s.id+k]).length;
+  const b = document.createElement("button"); b.className = "sec";
+  b.innerHTML = "<b></b><span></span><div class='meter'><i></i></div>";
+  b.querySelector("b").textContent = s.name;
+  b.querySelector("span").textContent = s.desc + " · " + g + " of " + n + " mastered";
+  b.querySelector("i").style.width = (g/n*100) + "%";
+  b.onclick = () => begin(s.id);
+  groups.get(s.group).appendChild(b);
+ });
+ show("home");
+}
+function begin(sec){
+ daily = sec === "daily"; i = 0; right = 0;
+ let pool;
+ if (daily) pool = shuffle(ALL, seeded(today())).slice(0,5);
+ else {
+  const list = ALL.filter(q => q.id.startsWith(sec) && !isNaN(q.id.slice(sec.length)));
+  const fresh = shuffle(list.filter(q => !state.got[q.id]), Math.random), old = shuffle(list.filter(q => state.got[q.id]), Math.random);
+  pool = fresh.concat(old).slice(0,5);
+ }
+ qs = pool.map(q => ({...q, o: shuffle(q.opts.map((t,k)=>({t,ok:k===0})), Math.random)}));
+ show("quiz"); render();
+}
+function questionVisual(q){
+ if(q.fig) return null; // Figure-selection questions already show charts as their answer options.
+ const t=q.q.toLowerCase();
+ if(t.includes("wick scenario 1")) return {chart:fig([[18,28,15,26],[26,38,23,36],[36,48,33,45],[45,57,42,54],[54,67,51,63],[63,78,59,66],[66,88,62,64],[64,68,48,51],[51,54,31,34],[34,37,18,21]],{lines:[[72,"#3c76c5",true],[18,"#d6455d",true]]}),caption:"Illustration: price trends up, wicks above the structure high, then rotates down toward the structure low."};
+ if(t.includes("wick scenario 2")) return {chart:fig([[18,29,15,26],[26,40,23,37],[37,51,34,48],[48,62,45,59],[59,76,55,64],[64,70,52,56],[56,65,50,62],[62,82,59,78]],{lines:[[74,"#3c76c5",true],[18,"#d6455d",true]]}),caption:"Illustration: the wick high is the level to watch; price pulls back to a higher low and then makes a higher high."};
+ if(t.includes("wick scenario 3")) return {chart:fig([[30,42,27,39],[39,54,36,51],[51,68,48,64],[64,82,60,70],[70,76,61,67],[67,88,65,84]],{lines:[[78,"#3c76c5",true]]}),caption:"Illustration: the wick takes the high, and the following candle closes above that level."};
+ if(t.includes("break of structure") || t.includes("bos") || t.includes("closes above the structure high") || t.includes("closes below the structure low")) return {chart:fig([[28,38,25,35],[35,48,32,45],[45,57,42,53],[53,62,45,48],[48,60,44,57],[57,76,54,73]],{lines:[[68,"#3c76c5",true],[25,"#d6455d",true]]}),caption:"Illustration: a break of structure is confirmed by a candle close beyond the marked structure level, not by a wick alone."};
+ if(t.includes("liquidity") || t.includes("stop-loss") || t.includes("stop loss") || t.includes("sfp") || t.includes("sweep")) return {chart:fig([[45,55,42,52],[52,64,49,61],[61,72,58,68],[68,75,60,63],[63,66,45,48],[48,52,25,29],[29,46,26,42],[42,57,39,54]],{lines:[[74,"#3c76c5",true],[26,"#d6455d",true]]}),caption:"Illustration: price sweeps a prior extreme, triggers stops, and may then return inside the range."};
+ if(t.includes("range") || t.includes("premium") || t.includes("discount") || t.includes("equilibrium") || t.includes("deviation")) return {chart:fig([[35,48,30,44],[44,68,41,64],[64,76,58,62],[62,70,44,48],[48,53,28,32],[32,50,29,46],[46,72,42,67],[67,75,58,61]],{lines:[[75,"#3c76c5",false],[52,"#8a96a3",true],[28,"#d6455d",false]]}),caption:"Illustration: a range has a high, low and midpoint (equilibrium); wicks outside the edges can be deviations."};
+ if(t.includes("six candle") || t.includes("2-2-2") || t.includes("inside bar")) return {chart:fig([[25,35,22,33],[33,46,30,44],[44,47,34,36],[36,40,25,28],[28,32,17,20],[20,36,18,33],[33,48,30,45]],{}),caption:"Illustration: look for expansion, retracement, then expansion again; inside bars do not count toward the 2-2-2 sequence."};
+ if(t.includes("uptrend") || t.includes("higher low") || t.includes("higher high") || t.includes("market structure low")) return {chart:fig([[18,30,15,27],[27,39,24,36],[36,42,28,31],[31,45,29,42],[42,56,39,53],[53,59,43,46],[46,63,44,60],[60,76,56,72]],{}),caption:"Illustration: an uptrend advances through higher highs, with pullbacks forming higher lows."};
+ if(t.includes("downtrend") || t.includes("lower high") || t.includes("lower low") || t.includes("market structure high")) return {chart:fig([[82,88,70,73],[73,79,60,64],[64,72,58,69],[69,72,51,54],[54,62,44,48],[48,57,40,53],[53,56,28,32],[32,39,20,24]],{}),caption:"Illustration: a downtrend advances through lower lows, with bounces forming lower highs."};
+ if(t.includes("structure supply or demand") || t.includes("supply and demand area") || t.includes("multiple candles")) return {chart:fig([[56,62,46,48],[48,52,37,40],[40,46,32,35],[35,61,34,58],[58,74,55,71],[71,84,67,81],[81,85,72,75],[75,78,61,64]],{boxes:[[0,2,31,53,"#159568"]]}),caption:"Demand zone (green): a base of several candles before a strong move up. Look for the base and the clear expansion away from it."};
+ if(t.includes("supply") || t.includes("demand") || t.includes("order block") || t.includes("fair value gap") || t.includes("inefficiency")) return {chart:fig([[76,82,65,68],[68,71,55,58],[58,63,48,51],[51,73,50,70],[70,86,67,83],[83,88,73,76],[76,79,62,65],[65,68,49,52]],{boxes:[[1,2,48,71,"#d64d5b"]]}),caption:"Illustration: the shaded red area marks a supply base before a strong move down. For demand, look for the mirror image: a base before a strong move up."};
+ return null;
+}
+function render(){
+ const q = qs[i]; picked = null; answered = false;
+ const visual = questionVisual(q); const visualBox = $("questionVisual");
+ if(visual){ visualBox.innerHTML = visual.chart + '<div class="visual-caption">' + visual.caption + '</div>'; visualBox.classList.remove("hide"); }
+ else { visualBox.innerHTML = ""; visualBox.classList.add("hide"); }
+ $("prog").style.width = (i/qs.length*100) + "%";
+ $("tag").textContent = q.sec + " · " + (i+1) + " of " + qs.length;
+ $("qtext").textContent = q.q;
+ $("fb").className = "fb hide";
+ $("check").textContent = "Check"; $("check").className = "btn"; $("check").disabled = true;
+ $("opts").innerHTML = ""; $("opts").className = q.fig ? "figgrid" : "";
+ q.o.forEach((o,k) => {
+  const b = document.createElement("button"); b.className = "opt";
+  if (q.fig) { b.innerHTML = o.t; b.classList.add("figopt"); b.setAttribute("aria-label","Figure "+String.fromCharCode(65+k)); b.dataset.l = "Figure "+String.fromCharCode(65+k); } else b.textContent = o.t;
+  b.onclick = () => { if(answered) return; picked = k; [...$("opts").children].forEach((c,n)=>c.classList.toggle("sel",n===k)); $("check").disabled = false; };
+  $("opts").appendChild(b);
+ });
+}
+function check(){
+ const q = qs[i];
+ if (answered) { i++; if (i < qs.length) render(); else finish(); return; }
+ answered = true;
+ const ok = q.o[picked].ok;
+ if (ok) { right++; state.got[q.id] = true; } else delete state.got[q.id];
+ [...$("opts").children].forEach((c,n) => { c.classList.remove("sel"); if (q.o[n].ok) c.classList.add("ok"); else if (n===picked) c.classList.add("no"); });
+ $("fb").className = "fb " + (ok ? "ok" : "no");
+ $("fb").innerHTML = "<b>" + (ok ? "Correct" : "Not quite") + "</b>";
+ $("fb").appendChild(document.createTextNode(q.why));
+ $("prog").style.width = ((i+1)/qs.length*100) + "%";
+ $("check").textContent = i === qs.length-1 ? "Finish" : "Continue";
+ $("check").className = "btn" + (ok ? "" : " bad");
+}
+function finish(){
+ let newlyWon = null;
+ if (daily && state.dailyResultDate !== today()) {
+  const previousDay = dayOffset(-1);
+  if (right >= 4) state.streak = state.last === previousDay ? (state.streak||0)+1 : 1;
+  else state.streak = 0;
+  state.last = today(); state.dailyResultDate = today();
+  state.prizes = state.prizes || {};
+  const prize = prizeFor(state.streak);
+  if (prize && !state.prizes[prize.key]) { state.prizes[prize.key] = true; newlyWon = prize; }
+ }
+ save();
+ $("score").textContent = right + " / " + qs.length;
+ $("prizeBox").classList.add("hide"); $("emailHelp").classList.add("hide"); $("emailPrize").onclick=null;
+ if (newlyWon) {
+  $("doneMsg").textContent = "YOU DID IT!! 🎉 You got at least 4/5 today and your correct-day streak is now " + state.streak + " days. Prize unlocked!";
+  preparePrizeEmail(newlyWon, state.streak);
+ } else if (daily && right < 4) {
+  $("doneMsg").textContent = right + "/5 today — you're learning, and that's what matters! Get 4/5 or better in a daily mix to keep your prize streak going. 💛";
+ } else {
+  $("doneMsg").textContent = right === qs.length ? "PERFECT ROUND!! Look at you go! ✨" : right >= 3 ? "Solid work! Every round makes these ideas more familiar. Keep going 💛" : "No stress — mistakes are part of learning. Have another go when you feel like it 💪";
+ }
+ show("done");
+}
+$("daily").onclick = () => begin("daily");
+$("quizBack").onclick = home;
+$("check").onclick = check;
+$("back").onclick = home;
+function openBirthdayIfFirstVisit(){
+ let seen = false;
+ try { seen = localStorage.getItem("sofieBirthdaySeen") === "yes"; } catch(e) {}
+ if (seen) return;
+ $("birthdayMessage").textContent = MESSAGE;
+ const layer = $("confettiLayer");
+ const colors = ["#f4a9bb","#f3c86a","#a9d9bb","#9fc6f2","#c6a8e8","#f08b70"];
+ for(let n=0;n<48;n++){
+  const piece=document.createElement("span"); piece.className="confetti";
+  piece.style.left=(Math.random()*100)+"%";
+  piece.style.background=colors[n%colors.length];
+  piece.style.animationDelay=(Math.random()*-5)+"s";
+  piece.style.animationDuration=(3.2+Math.random()*3)+"s";
+  piece.style.transform="rotate("+Math.floor(Math.random()*360)+"deg)";
+  layer.appendChild(piece);
+ }
+ $("birthdayOverlay").classList.remove("hide");
+}
+function closeBirthday(){
+ $("birthdayOverlay").classList.add("hide");
+ try { localStorage.setItem("sofieBirthdaySeen","yes"); } catch(e) {}
+}
+$("closeBirthday").onclick = closeBirthday;
+$("birthdayOverlay").addEventListener("click", e => { if(e.target === $("birthdayOverlay")) closeBirthday(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !$("birthdayOverlay").classList.contains("hide")) closeBirthday(); });
+home();
+openBirthdayIfFirstVisit();
+</script>
+</body>
+</html>
